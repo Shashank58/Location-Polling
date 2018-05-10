@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Location Polling</string>
+    <string name="title_activity_tracing">Map</string>
+</resources>
