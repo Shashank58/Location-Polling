@@ -16,18 +16,16 @@ import kotlin.concurrent.thread
 
 class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickListener, LocationPollingContract.LocationCallback {
 
-  private val locationPollingContract = LocationService(this)
-  private var sharedPrefHelper: SharedPrefHelper? = null
-
-  private lateinit var map: GoogleMap
-
   private var isActive = false
+
+  private lateinit var locationPollingContract: LocationPollingContract.Service
+  private lateinit var map: GoogleMap
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_tracing)
 
-    sharedPrefHelper = SharedPrefHelper(this)
+    locationPollingContract = LocationService(this, SharedPrefHelper(this))
     requestMapLoad()
     toggle_location.setOnClickListener(this)
   }
@@ -46,13 +44,13 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
     when (v?.id) {
       R.id.toggle_location -> {
         if (isActive) {
-          isActive = false
+          toggle_location.setImageResource(R.drawable.ic_play_arrow)
           locationPollingContract.cancelLocationUpdates()
-          sharedPrefHelper!!.clearSharedPref()
         } else {
-          isActive = true
+          toggle_location.setImageResource(R.drawable.ic_stop)
           locationPollingContract.getLocationUpdates()
         }
+        isActive = !isActive
       }
     }
   }
@@ -66,21 +64,26 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
   override fun onMapReady(googleMap: GoogleMap) {
     map = googleMap
     map.isMyLocationEnabled = true
-    if (sharedPrefHelper!!.getLatitude().toInt() != -1 && sharedPrefHelper!!.getLongitude().toInt() != -1) {
+    if (locationPollingContract.isPollingActive()) {
       stopService(Intent(this, LocationPollingService::class.java))
-      sharedPrefHelper!!.clearSharedPref()
+      locationPollingContract.cancelLocationUpdates()
 
+      toggle_location.setImageResource(R.drawable.ic_stop)
       isActive = true
       locationPollingContract.getLocationUpdates()
     } else {
+      toggle_location.setImageResource(R.drawable.ic_play_arrow)
       val bangalore = LatLng(12.9716, 77.5946)
-      map.addMarker(MarkerOptions().position(bangalore).title("Bangalore"))
-      map.animateCamera(CameraUpdateFactory.newLatLngZoom(bangalore, 12f))
+      updateLocation("Bangalore", bangalore, Constants.DEFAULT_LOCATION_ZOOM)
     }
   }
 
   override fun onLocationReceived(location: LatLng) {
-    map.addMarker(MarkerOptions().position(location).title("Location"))
-    map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14.4f))
+    updateLocation("Location", location, Constants.LOCATION_ZOOM)
+  }
+
+  private fun updateLocation(title: String, location: LatLng, zoom: Float) {
+    map.addMarker(MarkerOptions().position(location).title(title))
+    map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
   }
 }

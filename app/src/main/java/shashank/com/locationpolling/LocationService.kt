@@ -7,7 +7,11 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 
-class LocationService(private val locationCallback: LocationPollingContract.LocationCallback): LocationPollingContract.Service {
+class LocationService(
+    private val locationCallback: LocationPollingContract.LocationCallback,
+    private val sharedPrefHelper: SharedPrefHelper
+) : LocationPollingContract.Service {
+
   private var timeHandler: Handler? = null
 
   init {
@@ -29,12 +33,16 @@ class LocationService(private val locationCallback: LocationPollingContract.Loca
             locationCallback.onLocationReceived(LatLng(latitude, longitude))
           }
           timeHandler?.postDelayed(run, Constants.UPDATE_FREQUENCY_MILLISECONDS)
-        }, {it.printStackTrace()})
+        }, { it.printStackTrace() })
   }
 
   override fun cancelLocationUpdates() {
     timeHandler?.removeCallbacks(run)
+    sharedPrefHelper.clearSharedPref()
   }
+
+  override fun isPollingActive(): Boolean = sharedPrefHelper.getLatitude().toInt() != -1 &&
+      sharedPrefHelper.getLongitude().toInt() != -1
 
   private var run: Runnable = Runnable { getLocationUpdates() }
 }

@@ -8,6 +8,8 @@ interface LocationPollingContract {
     fun getLocationUpdates()
 
     fun cancelLocationUpdates()
+
+    fun isPollingActive(): Boolean
   }
 
   interface LocationCallback {
