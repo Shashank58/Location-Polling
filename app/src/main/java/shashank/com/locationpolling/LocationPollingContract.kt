@@ -5,11 +5,13 @@ import com.google.android.gms.maps.model.LatLng
 interface LocationPollingContract {
 
   interface Service {
-    fun getLocationUpdates()
+    fun getContinuousLocationUpdates()
 
     fun cancelLocationUpdates()
 
     fun isPollingActive(): Boolean
+    
+    fun saveLatitudeAndLongitude(latitude: Double, longitude: Double)
   }
 
   interface LocationCallback {

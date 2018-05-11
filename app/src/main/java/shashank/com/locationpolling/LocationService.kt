@@ -18,8 +18,8 @@ class LocationService(
     timeHandler = Handler()
   }
 
-  override fun getLocationUpdates() {
-    ApiClient().getClient()
+  override fun getContinuousLocationUpdates() {
+    ApiClient.getClient()
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .build().create(ApiRoutes::class.java)
         .getLocation()
@@ -44,5 +44,9 @@ class LocationService(
   override fun isPollingActive(): Boolean = sharedPrefHelper.getLatitude().toInt() != -1 &&
       sharedPrefHelper.getLongitude().toInt() != -1
 
-  private var run: Runnable = Runnable { getLocationUpdates() }
+  override fun saveLatitudeAndLongitude(latitude: Double, longitude: Double) {
+    sharedPrefHelper.saveLatitudeAndLongitude(latitude, longitude)
+  }
+
+  private var run: Runnable = Runnable { getContinuousLocationUpdates() }
 }

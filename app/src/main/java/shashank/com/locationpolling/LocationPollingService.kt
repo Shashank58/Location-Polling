@@ -6,18 +6,18 @@ import android.os.IBinder
 import com.google.android.gms.maps.model.LatLng
 
 class LocationPollingService: Service(), LocationPollingContract.LocationCallback {
-  private val locationService = LocationService(this)
+  private lateinit var locationService: LocationPollingContract.Service
   private lateinit var sharedPrefHelper: SharedPrefHelper
 
   override fun onBind(intent: Intent?): IBinder? = null
 
   override fun onCreate() {
     super.onCreate()
-    sharedPrefHelper = SharedPrefHelper(this)
+    locationService = LocationService(this, SharedPrefHelper(this))
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-    locationService.getLocationUpdates()
+    locationService.getContinuousLocationUpdates()
     return START_NOT_STICKY
   }
 
@@ -27,7 +27,7 @@ class LocationPollingService: Service(), LocationPollingContract.LocationCallbac
   }
 
   override fun onLocationReceived(location: LatLng) {
-    sharedPrefHelper.saveLatitudeAndLongitude(location.latitude, location.longitude)
+    locationService.saveLatitudeAndLongitude(location.latitude, location.longitude)
   }
 
 }

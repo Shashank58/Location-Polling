@@ -5,17 +5,20 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 
 class ApiClient {
-  private val baseUrl = "http://10.0.2.2:8080"
-  private lateinit var httpClient: OkHttpClient.Builder
 
-  public fun getClient(): Retrofit.Builder {
-    httpClient = OkHttpClient.Builder()
-    val logging = HttpLoggingInterceptor()
-    // set your desired log level
-    logging.level = HttpLoggingInterceptor.Level.BODY
-    // add logging as last interceptor
-    httpClient.addInterceptor(logging)
+  companion object {
+    private const val baseUrl = "http://10.0.2.2:8080"
+    private var httpClient: OkHttpClient.Builder? = null
+    fun getClient(): Retrofit.Builder {
+      if (httpClient == null) {
+        httpClient = OkHttpClient.Builder()
+        val logging = HttpLoggingInterceptor()
+        logging.level = HttpLoggingInterceptor.Level.BODY
+        // add logging as interceptor
+        httpClient!!.addInterceptor(logging)
+      }
 
-    return Retrofit.Builder().baseUrl(baseUrl).client(httpClient.build())
+      return Retrofit.Builder().baseUrl(baseUrl).client(httpClient!!.build())
+    }
   }
 }

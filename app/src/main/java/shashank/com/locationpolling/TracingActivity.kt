@@ -48,7 +48,7 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
           locationPollingContract.cancelLocationUpdates()
         } else {
           toggle_location.setImageResource(R.drawable.ic_stop)
-          locationPollingContract.getLocationUpdates()
+          locationPollingContract.getContinuousLocationUpdates()
         }
         isActive = !isActive
       }
@@ -70,7 +70,8 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
 
       toggle_location.setImageResource(R.drawable.ic_stop)
       isActive = true
-      locationPollingContract.getLocationUpdates()
+      // Move over to normal polling instead of service
+      locationPollingContract.getContinuousLocationUpdates()
     } else {
       toggle_location.setImageResource(R.drawable.ic_play_arrow)
       val bangalore = LatLng(12.9716, 77.5946)
