@@ -7,7 +7,7 @@ import retrofit2.Retrofit
 class ApiClient {
 
   companion object {
-    private const val baseUrl = "http://10.0.2.2:8080"
+    private const val baseUrl = "http://10.0.2.2:8080/"
     private var httpClient: OkHttpClient.Builder? = null
     fun getClient(): Retrofit.Builder {
       if (httpClient == null) {

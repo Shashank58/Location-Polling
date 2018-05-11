@@ -44,10 +44,6 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
     }
   }
 
-  private fun requestPermission() {
-    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), FINE_LOCATION_PERMISSION)
-  }
-
   override fun onDestroy() {
     super.onDestroy()
     if (isActive) {
@@ -89,14 +85,6 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
     }
   }
 
-  private fun requestMapLoad() {
-    val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-    mapFragment.getMapAsync(this)
-  }
-
-  private fun isLocationPermissionGranted() = (ContextCompat.checkSelfPermission(this, Manifest
-      .permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-
   @SuppressLint("MissingPermission")
   override fun onMapReady(googleMap: GoogleMap) {
     map = googleMap
@@ -129,4 +117,16 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
     map.addMarker(MarkerOptions().position(location).title(title))
     map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
   }
+
+  private fun requestPermission() {
+    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), FINE_LOCATION_PERMISSION)
+  }
+
+  private fun requestMapLoad() {
+    val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+    mapFragment.getMapAsync(this)
+  }
+
+  private fun isLocationPermissionGranted() = (ContextCompat.checkSelfPermission(this, Manifest
+      .permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
 }

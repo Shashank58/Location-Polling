@@ -5,6 +5,6 @@ import retrofit2.http.GET
 import rx.Observable
 
 interface ApiRoutes {
-  @GET("/explore")
+  @GET("explore")
   fun getLocation(): Observable<ResponseBody>
 }
