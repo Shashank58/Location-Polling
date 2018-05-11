@@ -38,7 +38,6 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
     }
     if (isLocationPermissionGranted()) {
       requestMapLoad()
-      toggle_location.setOnClickListener(this)
     } else {
       requestPermission()
     }
@@ -125,6 +124,7 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
   private fun requestMapLoad() {
     val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
     mapFragment.getMapAsync(this)
+    toggle_location.setOnClickListener(this)
   }
 
   private fun isLocationPermissionGranted() = (ContextCompat.checkSelfPermission(this, Manifest
