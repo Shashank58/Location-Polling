@@ -7,4 +7,5 @@ object Constants {
   const val LONGITUDE = "longitude"
   const val LOCATION_ZOOM = 14.4f
   const val DEFAULT_LOCATION_ZOOM = 12f
+  const val IS_ACTIVE = "isActive"
 }

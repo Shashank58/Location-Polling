@@ -7,7 +7,6 @@ import com.google.android.gms.maps.model.LatLng
 
 class LocationPollingService: Service(), LocationPollingContract.LocationCallback {
   private lateinit var locationService: LocationPollingContract.Service
-  private lateinit var sharedPrefHelper: SharedPrefHelper
 
   override fun onBind(intent: Intent?): IBinder? = null
 

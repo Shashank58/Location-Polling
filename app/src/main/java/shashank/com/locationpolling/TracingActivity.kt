@@ -1,8 +1,13 @@
 package shashank.com.locationpolling
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -16,6 +21,8 @@ import kotlin.concurrent.thread
 
 class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickListener, LocationPollingContract.LocationCallback {
 
+  private val FINE_LOCATION_PERMISSION = 1
+
   private var isActive = false
 
   private lateinit var locationPollingContract: LocationPollingContract.Service
@@ -26,8 +33,19 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
     setContentView(R.layout.activity_tracing)
 
     locationPollingContract = LocationService(this, SharedPrefHelper(this))
-    requestMapLoad()
-    toggle_location.setOnClickListener(this)
+    if (savedInstanceState != null) {
+      isActive = savedInstanceState.getBoolean(Constants.IS_ACTIVE)
+    }
+    if (isLocationPermissionGranted()) {
+      requestMapLoad()
+      toggle_location.setOnClickListener(this)
+    } else {
+      requestPermission()
+    }
+  }
+
+  private fun requestPermission() {
+    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), FINE_LOCATION_PERMISSION)
   }
 
   override fun onDestroy() {
@@ -55,16 +73,35 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
     }
   }
 
+  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    when (requestCode) {
+      FINE_LOCATION_PERMISSION -> {
+        if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+          requestMapLoad()
+        } else {
+          AlertDialog.Builder(this)
+              .setTitle("Error")
+              .setMessage("Please enable location access to use this app")
+              .setPositiveButton(android.R.string.ok) { _, _ -> requestPermission() }
+              .create().show()
+        }
+      }
+    }
+  }
+
   private fun requestMapLoad() {
     val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
     mapFragment.getMapAsync(this)
   }
 
+  private fun isLocationPermissionGranted() = (ContextCompat.checkSelfPermission(this, Manifest
+      .permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+
   @SuppressLint("MissingPermission")
   override fun onMapReady(googleMap: GoogleMap) {
     map = googleMap
     map.isMyLocationEnabled = true
-    if (locationPollingContract.isPollingActive()) {
+    if (isActive || locationPollingContract.isPollingActive()) {
       stopService(Intent(this, LocationPollingService::class.java))
       locationPollingContract.cancelLocationUpdates()
 
@@ -81,6 +118,11 @@ class TracingActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickLis
 
   override fun onLocationReceived(location: LatLng) {
     updateLocation("Location", location, Constants.LOCATION_ZOOM)
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    outState.putBoolean(Constants.IS_ACTIVE, isActive)
+    super.onSaveInstanceState(outState)
   }
 
   private fun updateLocation(title: String, location: LatLng, zoom: Float) {
